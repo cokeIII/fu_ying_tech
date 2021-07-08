@@ -22,7 +22,7 @@ $row = mysqli_fetch_array($res);
 <body>
     <div class="container mt-5">
         <?php require_once "menu.php"; ?>
-        <div class="card mt-3">
+        <div class="card mt-3 mb-5">
             <div class="card-body">
 
                 <form action="editFuYingTech.php" method="post">

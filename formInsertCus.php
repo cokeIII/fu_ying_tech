@@ -16,7 +16,7 @@
 <body>
     <div class="container mt-5">
         <?php require_once "menu.php"; ?>
-        <div class="card mt-3">
+        <div class="card mt-3 mb-5">
             <div class="card-body">
                 <div class="row">
                     <div class="col-md-12">

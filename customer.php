@@ -21,7 +21,7 @@ $res = mysqli_query($conn, $sql);
 
 <body>
     <div class="container mt-5">
-        <?php require_once "menu.php";?>
+        <?php require_once "menu.php"; ?>
         <div class="card mt-3">
             <div class="card-body">
                 <div class="row">
@@ -47,8 +47,8 @@ $res = mysqli_query($conn, $sql);
                                         <td><?php echo $row["company_name"]; ?></td>
                                         <td><?php echo $row["website"]; ?></td>
                                         <td><?php echo $row["payment"]; ?></td>
-                                        <td><a href="formEditCus.php?id=<?php echo $row["id"]; ?>"><button class="btn btn-warning">Edit</button></a></td>
-                                        <td><a href="delCustomer.php?id=<?php echo $row["id"]; ?>"><button class="btn btn-danger">Delete</button></a></td>
+                                        <td><a href="formEditCus.php?id=<?php echo $row["id"]; ?>"><button class="btn btn-warning"><i class="fas fa-edit"></i> Edit</button></a></td>
+                                        <td><button class="btn btn-danger delCustomer" id="<?php echo $row["id"]; ?>"><i class="fas fa-trash-alt"></i> Del</button></td>
                                     </tr>
                                 <?php } ?>
                             </tbody>
@@ -65,8 +65,16 @@ $res = mysqli_query($conn, $sql);
 <script src="jquery/jquery.min.js"></script>
 <script src="dist/js/bootstrap.min.js"></script>
 <script src="jquery/jquery.dataTables.min.js"></script>
+<script src="jquery/jquery.redirect.js"></script>
 <script>
     $(document).ready(function() {
         $("#listCustomer").DataTable()
+        $(".delCustomer").click(function() {
+            if (confirm("you want to delete the item ?")) {
+                $.redirect("delCustomer.php", {
+                    id: $(this).attr("id"),
+                },"GET");
+            }
+        })
     })
 </script>

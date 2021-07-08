@@ -23,14 +23,16 @@ $res = mysqli_query($conn, $sql);
 $sqlFYT = "select * from fu_ying_tech";
 $resFTY = mysqli_query($conn, $sqlFYT);
 $rowFTY = mysqli_fetch_array($resFTY);
+$sqlPart = "select * from part";
+$resPart = mysqli_query($conn, $sqlPart);
 ?>
 
 <body>
     <div class="container mt-5">
         <?php require_once "menu.php"; ?>
-        <div class="card mt-3">
+        <div class="card mt-3 mb-5">
             <div class="card-body">
-                <form action="insertCustomer.php" method="post">
+                <form action="insertQuo.php" method="post" enctype="multipart/form-data">
                     <div class="row">
 
                         <div class="col-md-6">
@@ -39,7 +41,7 @@ $rowFTY = mysqli_fetch_array($resFTY);
                                 <div class="col-md-12">
                                     <div class="form-group">
                                         <label for="companyName">To:</label>
-                                        <select name="companyName" id="companyName">
+                                        <select name="companyName" id="companyName" required>
                                             <option value="">--- select customer ---</option>
                                             <?php while ($row = mysqli_fetch_array($res)) { ?>
                                                 <option value="<?php echo $row['id']; ?>"><?php echo $row["company_name"]; ?></option>
@@ -52,7 +54,7 @@ $rowFTY = mysqli_fetch_array($resFTY);
                                 <div class="col-md-12">
                                     <div class="form-group">
                                         <label for="attn">Attn:</label>
-                                        <select name="attn" id="attn" class="form-control">
+                                        <select name="attn" id="attn" class="form-control" required>
                                         </select>
                                     </div>
                                 </div>
@@ -64,7 +66,7 @@ $rowFTY = mysqli_fetch_array($resFTY);
                                         <?php
                                         $arrFYT = json_decode($rowFTY["contact_person"]); ?>
                                         <input type="hidden" id="arrFYT" value="<?php echo $arrFYT; ?>">
-                                        <select name="froms" id="froms" class="form-control">
+                                        <select name="froms" id="froms" class="form-control" required>
                                             <?php
                                             foreach ($arrFYT as $x => $value) {
                                             ?>
@@ -78,7 +80,7 @@ $rowFTY = mysqli_fetch_array($resFTY);
                                 <div class="col-md-12">
                                     <div class="form-group">
                                         <label for="contact">Contact:</label>
-                                        <textarea name="contact" id="contact" cols="30" rows="5" class="form-control"></textarea>
+                                        <textarea name="contact" id="contact" cols="30" rows="5" class="form-control" required></textarea>
                                     </div>
                                 </div>
                             </div>
@@ -88,34 +90,34 @@ $rowFTY = mysqli_fetch_array($resFTY);
                                 <label for="quoNo">Quotation No.:</label>
                                 <div class="row">
                                     <div class="col-md-3">
-                                        <input type="text" name="quoNoDate" id="quoNoDate" class="form-control" value="<?php echo substr(date("Y")+543,2).date("m");?>">
+                                        <input type="text" name="quoNoDate" id="quoNoDate" class="form-control" value="<?php echo substr(date("Y") + 543, 2) . date("m"); ?>" required>
                                     </div>
                                     <div class="col-md-3">
-                                        <input type="text" name="proNO" id="proNO" class="form-control">
+                                        <input type="text" name="quoNO" id="quoNO" class="form-control" required>
                                     </div>
                                     <div class="col-md-3">
-                                        <input type="text" name="empNO" id="empNO" class="form-control">
+                                        <input type="text" name="cusNO" id="cusNO" class="form-control" required>
                                     </div>
                                     <div class="col-md-3">
-                                        <input type="text" name="rNO" id="rNO" class="form-control">
+                                        <input type="text" name="verNO" id="verNO" class="form-control" required>
                                     </div>
                                 </div>
                             </div>
                             <div class="form-group">
                                 <label for="quoDate">Date:</label>
-                                <input type="date" name="quoDate" id="quoDate" class="form-control" value="<?php echo $date;?>">
+                                <input type="date" name="quoDate" id="quoDate" class="form-control" value="<?php echo $date; ?>" required>
                             </div>
                             <div class="form-group">
                                 <label for="deliveryDate">Delivery:</label>
-                                <input type="text" name="deliveryDate" id="deliveryDate" class="form-control">
+                                <input type="number" name="deliveryDate" id="deliveryDate" class="form-control" required>
                             </div>
                             <div class="form-group">
                                 <label for="payment">Term of Payment:</label>
-                                <input type="text" name="payment" id="payment" class="form-control">
+                                <input type="number" name="payment" id="payment" class="form-control" required>
                             </div>
                             <div class="form-group">
                                 <label for="shipment">Shipment:</label>
-                                <select name="shipment" id="shipment" class="form-control">
+                                <select name="shipment" id="shipment" class="form-control" required>
                                     <option value="DDP">DDP</option>
                                     <option value="DDU">DDU</option>
                                     <option value="C&F">C&F</option>
@@ -126,11 +128,73 @@ $rowFTY = mysqli_fetch_array($resFTY);
                             </div>
                         </div>
                     </div>
+                    <hr>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <button type="button" class="btn btn-primary" id="addPart"><i class="fas fa-plus"></i> Add part</button>
+                            <button type="button" class="btn btn-danger" id="delPart"><i class="fas fa-minus"></i> Delete part</button>
+                        </div>
+                    </div>
+
+                    <div class="row mt-3">
+                        <div class="col-md-12" id="disPalyPart">
+                            <div class="form-group row">
+                                <div class="col-md-4">
+                                    <label for="part_number">Part Number</label>
+                                    <select name="part_number[]" id="part_number-0" class="form-control part_number">
+                                        <option value="">--- select part ---</option>
+                                        <?php while ($rowPast = mysqli_fetch_array($resPart)) { ?>
+                                            <option value="<?php echo $rowPast["part_no"]; ?>"><?php echo $rowPast["part_no"]; ?></option>
+                                        <?php } ?>
+                                    </select>
+                                </div>
+                                <div class="col-md-4">
+                                    <label for="part_name">Part Name</label>
+                                    <input type="text" class="form-control part_name" name="part_name[]" id="part_name0" required>
+                                </div>
+                                <div class="col-md-2">
+                                    <label for="QTY">QTY</label>
+                                    <input type="text" class="form-control" name="QTY[]" id="QTY0" required>
+                                </div>
+                                <div class="col-md-2">
+                                    <label for="dis">Dis %</label>
+                                    <input type="text" class="form-control" name="dis[]" id="dis0" required>
+                                </div>
+                                <!-- <div class="col-md-3">
+                                    <label for="img">Parts Image</label>
+                                    <input type="file" class="form-control" name="img[]" id="img" accept="image/png, image/jpeg" required>
+                                </div> -->
+                            </div>
+                            <div class="form-group row">
+                                <!-- <div class="col-md-3">
+                                    <label for="unit">Unit</label>
+                                    <input type="text" class="form-control" name="unit[]" id="unit" required>
+                                </div>
+                                <div class="col-md-3">
+                                    <label for="unit_price">Unit Price</label>
+                                    <input type="text" class="form-control" name="unit_price[]" id="Unit" required>
+                                </div> -->
+
+                            </div>
+
+                        </div>
+                    </div>
+                    <hr>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <button type="submit" class="btn btn-primary btn-block"> <i class="fas fa-print"></i> Print </button>
+                        </div>
+                    </div>
                 </form>
             </div>
         </div>
     </div>
 </body>
+<?php
+$resPart2 = mysqli_query($conn, $sqlPart);
+$rowPast2 = mysqli_fetch_array($resPart2);
+// print_r($rowPast2);
+?>
 
 </html>
 <script src="jquery/jquery.min.js"></script>
@@ -139,6 +203,75 @@ $rowFTY = mysqli_fetch_array($resFTY);
 <script src="dist/select2/select2.min.js"></script>
 <script>
     $(document).ready(function() {
+        $("#delPart").click(function() {
+            $("#disPalyPart").find(".row:last").remove();
+        })
+
+        let strOpt = "";
+
+        $.ajax({
+            url: 'ajax/getPart.php',
+            type: 'POST',
+            data: {
+                partAll: true,
+            },
+            success: function(data) {
+                let obj = JSON.parse(data)
+                obj.forEach(element => {
+                    strOpt += '<option value="' + element.part_no + '">' + element.part_no + '</option>'
+                })
+            }
+        });
+        let idAddPart = 1;
+        $("#addPart").click(function() {
+            $("#disPalyPart").append(
+                '<div class="form-group row">' +
+                '<div class="col-md-4">' +
+                '<label for="part_number">Part Number</label>' +
+                '<select name="part_number[]" id="part_number-' + idAddPart + '" class="form-control part_number">' +
+                '<option value="">--- select part ---</option>' +
+                strOpt +
+                '</select> ' +
+                '</div>' +
+                '<div class="col-md-4">' +
+                '<label for="part_name">Part Name</label>' +
+                '<input type="text" class="form-control part_name" name="part_name[]" id="part_name' + idAddPart + '" required>' +
+                '</div>' +
+                '<div class="col-md-2">' +
+                '<label for="QTY">QTY</label>' +
+                '<input type="text" class="form-control" name="QTY[]" id="QTY' + idAddPart + '" required>' +
+                '</div>' +
+                '<div class="col-md-2">' +
+                '<label for="dis">Dis %</label>' +
+                '<input type="text" class="form-control" name="dis[]" id="dis' + idAddPart + '" required>' +
+                '</div>' +
+                '</div>'
+            )
+            idAddPart++
+            $(".part_number").select2({
+                width: '100%' // need to override the changed default
+            })
+        })
+        $(document).on('change','.part_number',function() {
+            let thisItem = $(this)
+            $.ajax({
+                url: 'ajax/getPart.php',
+                type: 'POST',
+                data: {
+                    partName: true,
+                    id: $(this).val()
+                },
+                success: function(data) {
+                    console.log(data);
+                    let idFind = thisItem.attr("id").split("-")
+                    console.log(idFind[1])
+                    thisItem.parents(".row").find("#part_name"+idFind[1]).val(data)
+                }
+            });
+        })
+        $(".part_number").select2({
+            width: '100%' // need to override the changed default
+        })
         $("#companyName").select2({
             width: '100%' // need to override the changed default
         })
@@ -154,9 +287,11 @@ $rowFTY = mysqli_fetch_array($resFTY);
                 },
                 success: function(data) {
                     let obj = JSON.parse(data)
+                    $("#payment").val(obj[0])
+                    $("#cusNO").val(obj[2].substr(1, obj[2].length) + "A")
                     $("#attn").html();
                     $("#attn").append("<option value='' >--- select Attn ---</option>")
-                    $.each(obj, function(index, value) {
+                    $.each(obj[1], function(index, value) {
                         console.log(value.PersonName)
                         $("#attn").append("<option value='" + value.PersonName + "' > " +
                             value.PersonName + "</option>")
