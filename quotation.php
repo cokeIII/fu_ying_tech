@@ -25,6 +25,8 @@ $resFTY = mysqli_query($conn, $sqlFYT);
 $rowFTY = mysqli_fetch_array($resFTY);
 $sqlPart = "select * from part";
 $resPart = mysqli_query($conn, $sqlPart);
+$sqlGetQuo = "select * from quotation group by quo_no";
+$resGetQuo = mysqli_query($conn, $sqlGetQuo);
 ?>
 
 <body>
@@ -32,6 +34,18 @@ $resPart = mysqli_query($conn, $sqlPart);
         <?php require_once "menu.php"; ?>
         <div class="card mt-3 mb-5">
             <div class="card-body">
+                <h3>Create Quotation</h3>
+                <div class="row mt-3 mb-3">
+                    <div class="col-md-4">
+                        <select name="getQuo" id="getQuo">
+                            <option value="">--- Select Quotation ---</option>
+                            <?php while ($rowGetQuo = mysqli_fetch_array($resGetQuo)) { ?>
+                                <option value="<?php echo $rowGetQuo["quo_no"]; ?>"><?php echo $rowGetQuo["quo_no"]; ?></option>
+                            <?php } ?>
+                        </select>
+                    </div>
+                </div>
+                <hr>
                 <form action="insertQuo.php" method="post" enctype="multipart/form-data">
                     <div class="row">
 
@@ -44,7 +58,7 @@ $resPart = mysqli_query($conn, $sqlPart);
                                         <select name="companyName" id="companyName" required>
                                             <option value="">--- select customer ---</option>
                                             <?php while ($row = mysqli_fetch_array($res)) { ?>
-                                                <option value="<?php echo $row['id']; ?>"><?php echo $row["company_name"]; ?></option>
+                                                <option value="<?php echo $row['company_code']; ?>"><?php echo $row["company_name"]; ?></option>
                                             <?php } ?>
                                         </select>
                                     </div>
@@ -158,7 +172,7 @@ $resPart = mysqli_query($conn, $sqlPart);
                                 </div>
                                 <div class="col-md-2">
                                     <label for="dis">Dis %</label>
-                                    <input type="text" class="form-control" name="dis[]" id="dis0" required>
+                                    <input type="text" class="form-control" name="dis[]" id="dis0">
                                 </div>
                                 <!-- <div class="col-md-3">
                                     <label for="img">Parts Image</label>
@@ -182,7 +196,7 @@ $resPart = mysqli_query($conn, $sqlPart);
                     <hr>
                     <div class="row">
                         <div class="col-md-12">
-                            <button type="submit" class="btn btn-primary btn-block"> <i class="fas fa-print"></i> Print </button>
+                            <button type="submit" class="btn btn-primary btn-block"> <i class="fas fa-file-alt"></i> Create Quotation </button>
                         </div>
                     </div>
                 </form>
@@ -203,10 +217,14 @@ $rowPast2 = mysqli_fetch_array($resPart2);
 <script src="dist/select2/select2.min.js"></script>
 <script>
     $(document).ready(function() {
-        $("#delPart").click(function() {
-            $("#disPalyPart").find(".row:last").remove();
+        let getQuo_attn = null;
+        let idAddPart = 1;
+        $("#getQuo").select2({
+            width: '100%'
         })
-
+        $("#froms").select2({
+            width: '100%'
+        })
         let strOpt = "";
 
         $.ajax({
@@ -222,7 +240,71 @@ $rowPast2 = mysqli_fetch_array($resPart2);
                 })
             }
         });
-        let idAddPart = 1;
+        $("#getQuo").change(function() {
+            $.ajax({
+                url: 'ajax/getQuo.php',
+                type: 'POST',
+                data: {
+                    quo_no: $("#getQuo").val(),
+                },
+                success: function(data) {
+                    let obj = JSON.parse(data)
+                    console.log(obj)
+                    $("#companyName").val(obj.quo_to).trigger("change")
+                    getQuo_attn = obj.quo_attn
+                    $("#froms").val(obj.quo_from).trigger("change")
+                    let quo_no_arr = obj.quo_no.split("-")
+                    $("#quoNoDate").val(quo_no_arr[0])
+                    $("#quoNO").val(quo_no_arr[1])
+                    $("#cusNO").val(quo_no_arr[2])
+                    $("#verNO").val(quo_no_arr[3])
+                    $("#quoDate").val(obj.quo_date)
+                    $("#deliveryDate").val(obj.delivery)
+                    $("#payment").val(obj.term_of_payment)
+                    $("#shipment").val(obj.shipment)
+                    $("#disPalyPart").html("")
+                    obj.part.forEach(element => {
+
+                        $("#disPalyPart").append(
+                            '<div class="form-group row">' +
+                            '<div class="col-md-4">' +
+                            '<label for="part_number">Part Number</label>' +
+                            '<select name="part_number[]" id="part_number-' + idAddPart + '" class="form-control part_number">' +
+                            '<option value="">--- select part ---</option>' +
+                            strOpt +
+                            '</select> ' +
+                            '</div>' +
+                            '<div class="col-md-4">' +
+                            '<label for="part_name">Part Name</label>' +
+                            '<input type="text" class="form-control part_name" name="part_name[]" id="part_name' + idAddPart + '" required>' +
+                            '</div>' +
+                            '<div class="col-md-2">' +
+                            '<label for="QTY">QTY</label>' +
+                            '<input type="text" class="form-control" name="QTY[]" id="QTY' + idAddPart + '" required>' +
+                            '</div>' +
+                            '<div class="col-md-2">' +
+                            '<label for="dis">Dis %</label>' +
+                            '<input type="text" class="form-control" name="dis[]" id="dis' + idAddPart + '" >' +
+                            '</div>' +
+                            '</div>'
+                        )
+                        $(".part_number").select2({
+                            width: '100%' // need to override the changed default
+                        })
+                        $("#part_number-"+idAddPart).val(element.part_no).trigger("change")
+                        $("#QTY"+idAddPart).val(element.qty)
+                        $("#dis"+idAddPart).val(element.discount)
+                        idAddPart++
+                    });
+                }
+            });
+        })
+        $("#delPart").click(function() {
+            $("#disPalyPart").find(".row:last").remove();
+        })
+
+
+
         $("#addPart").click(function() {
             $("#disPalyPart").append(
                 '<div class="form-group row">' +
@@ -243,7 +325,7 @@ $rowPast2 = mysqli_fetch_array($resPart2);
                 '</div>' +
                 '<div class="col-md-2">' +
                 '<label for="dis">Dis %</label>' +
-                '<input type="text" class="form-control" name="dis[]" id="dis' + idAddPart + '" required>' +
+                '<input type="text" class="form-control" name="dis[]" id="dis' + idAddPart + '" >' +
                 '</div>' +
                 '</div>'
             )
@@ -252,7 +334,7 @@ $rowPast2 = mysqli_fetch_array($resPart2);
                 width: '100%' // need to override the changed default
             })
         })
-        $(document).on('change','.part_number',function() {
+        $(document).on('change', '.part_number', function() {
             let thisItem = $(this)
             $.ajax({
                 url: 'ajax/getPart.php',
@@ -265,7 +347,7 @@ $rowPast2 = mysqli_fetch_array($resPart2);
                     console.log(data);
                     let idFind = thisItem.attr("id").split("-")
                     console.log(idFind[1])
-                    thisItem.parents(".row").find("#part_name"+idFind[1]).val(data)
+                    thisItem.parents(".row").find("#part_name" + idFind[1]).val(data)
                 }
             });
         })
@@ -299,6 +381,9 @@ $rowPast2 = mysqli_fetch_array($resPart2);
                     $("#attn").select2({
                         width: '100%' // need to override the changed default
                     })
+                    if (getQuo_attn) {
+                        $("#attn").val(getQuo_attn).trigger("change")
+                    }
                 }
             });
         })

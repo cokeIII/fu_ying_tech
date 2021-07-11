@@ -24,10 +24,10 @@ $disArr = $_REQUEST["dis"];
 $i = 0;
 foreach ($part_numberArr as $value) {
     // $part_name = $part_nameArr[$i];
-    // $QTY = $QTYArr[$i];
+    $QTY = $QTYArr[$i];
     // $unit = $unitArr[$i];
     // $unit_price = $unit_priceArr[$i];
-    // $dis = $disArr[$i];
+    $dis = $disArr[$i];
     
     $sql = "insert into quotation
     (
@@ -40,7 +40,9 @@ foreach ($part_numberArr as $value) {
        quo_date,
        delivery,
        term_of_payment,
-       shipment
+       shipment,
+       qty,
+       discount
     ) values (
        '$quo_no',
        '$value',
@@ -51,11 +53,16 @@ foreach ($part_numberArr as $value) {
        '$quo_date',
        '$delivery',
        '$term_of_payment',
-       '$shipment'
+       '$shipment',
+       '$qty',
+       '$dis'
     )
    ";
     echo $sql;
     $res = mysqli_query($conn, $sql);
-
+    if(count($part_numberArr)-1 == $i){
+        header("location: listQuo.php");
+    }
     $i++;
+
 }
