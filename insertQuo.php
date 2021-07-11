@@ -54,7 +54,7 @@ foreach ($part_numberArr as $value) {
        '$delivery',
        '$term_of_payment',
        '$shipment',
-       '$qty',
+       '$QTY',
        '$dis'
     )
    ";

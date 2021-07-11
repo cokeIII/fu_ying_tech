@@ -39,7 +39,7 @@ id = '$id'
  ";
 $res = mysqli_query($conn,$sql);
 if($res){
-    header("location: fuYingTech.php");
+    header("location: index.php");
 } else {
     echo $sql;
 }
